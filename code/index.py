@@ -4,7 +4,7 @@ import random
 import time
 from functools import partial
 from io import BytesIO
-from PIL import Image
+from wand.image import Image
 
 import httpx
 import uvicorn
@@ -179,11 +179,11 @@ async def new_room_cover(filename: str):
     if not os.path.exists(path):
         async with httpx.AsyncClient() as session:
             resp = await session.get('https://i0.hdslb.com/bfs/live/new_room_cover/'+filename)
-        content = BytesIO(resp.content)
-        img = Image.open(content)
-        img.save('cover\\raw_'+filename)
-        img = img.resize((196, int(img.height*196/img.width)))
-        img.save(path)
+        # content = BytesIO(resp.content)
+        with Image(blob=resp.content) as img:
+            img.save(filename='cover\\raw_'+filename)
+            img.resize(width=196, height=int(img.height*196/img.width))
+            img.save(path)
     if os.path.exists(path):
         return StreamingResponse(open(path, mode="rb"), media_type="image/jpg")
 
