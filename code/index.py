@@ -9,18 +9,13 @@ import httpx
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from PIL import Image
 from pywebio.input import *
 from pywebio.output import *
 from pywebio.platform.fastapi import webio_routes
 from pywebio.session import run_asyncio_coroutine as rac
 from pywebio.session import run_js
 
-import notice
-
 app = FastAPI()
-esu = Image.open('esu.png')  # 查询页面配图
-forever = Image.open('forever.png')  # 私活页面配图
 
 def code():
     '打印 python 源码'
@@ -45,16 +40,6 @@ def t2s(timenum: int, format: str = '%H:%M:%S') -> str:
 
 # 打印直播场次信息
 def put_live(room_info: dict, pos: int):
-    if not os.path.exists('cover\\{room}_{st}.png'.format_map(room_info)):
-        try:
-            if room_info['cover']:
-                r = httpx.get(room_info['cover'])  # 获取直播封面
-                img = Image.open(BytesIO(r.content))
-                img = img.resize((200, int(img.height*200/img.width)))
-                img.save('cover\\{room}_{st}.png'.format_map(room_info))
-        except Exception as e:
-            # 开了魔法这里会报错
-            toast(f'又是这里报错 Exception: {e} line: {e.__traceback__.tb_lineno}', 0, color='error')
     room_info["rst"], room_info["rsp"] = t2s(room_info["st"], "%Y/%m/%d %H:%M:%S"), t2s(room_info["sp"], "%Y/%m/%d %H:%M:%S")
     put_html('''
     <div style="display: grid; grid-auto-flow: column; grid-template-columns: 10fr 1fr 30fr;" class="pywebio-clickable">
@@ -147,7 +132,6 @@ async def cha():
         '直播只是工作吗直播只是工作吗直播只是工作吗？'
     ]
     put_markdown(f'# 😎 api.nana7mi.link <font color="grey" size=4>*{random.choice(quotations)}*</font>')
-    put_image(esu, format='png').onclick(partial(run_js, code_='window.open().location="https://www.bilibili.com/video/BV1pR4y1W7M7";')),
     put_buttons(['😋查发言', '🍜查直播'], onclick=onclick),
     put_scope('query_scope')
     try:
@@ -165,15 +149,12 @@ async def cha():
 async def about():
     '关于'
     put_tabs([
-        {'title': '公告', 'content': notice.notice()},
         {'title': '源码', 'content': code()},
         {'title': '私货', 'content': [
             put_html('''
                 <iframe src="//player.bilibili.com/player.html?aid=78090377&bvid=BV1vJ411B7ng&cid=133606284&page=1"
                     width="100%" height="550" scrolling="true" border="0" frameborder="no" framespacing="0" allowfullscreen="true">
-                </iframe>'''),
-            put_markdown('#### <font color="red">我要陪你成为最强直播员</font>'),
-            put_image(forever, format='png'),
+                </iframe>''')
         ]}
     ]).style('border:none;')  # 取消 put_tabs 的边框
 
