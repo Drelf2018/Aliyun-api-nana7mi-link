@@ -1,6 +1,6 @@
 fastapi
 uvicorn
 httpx
-Pillow
+Pillow==4.0.0
 pywebio
 websockets
