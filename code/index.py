@@ -1,15 +1,11 @@
 ﻿import asyncio
-import os
 import random
 import time
 from functools import partial
-from io import BytesIO
-from wand.image import Image
 
 import httpx
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
 from pywebio import config
 from pywebio.input import *
 from pywebio.output import *
@@ -46,10 +42,9 @@ def t2s(timenum: int, format: str = '%H:%M:%S') -> str:
 async def put_live(room_info: dict, pos: int):
     room_info["rst"] = t2s(room_info["st"], "%Y/%m/%d %H:%M:%S")
     room_info["rsp"] = t2s(room_info["sp"], "%Y/%m/%d %H:%M:%S")
-    room_info['cover'] = room_info['cover'].replace('https://i0.hdslb.com/bfs/live/new_room_cover/', '')
     put_html(
 '''<div style="display: grid; grid-auto-flow: column; grid-template-columns: 10fr 1fr 30fr;" class="pywebio-clickable">
-    <a href="/cover/raw_{cover}"><img src="/cover/{cover}" width="196px" style="border-radius:10px"></a>
+    <a href="{cover}"><img src="https://api.nana7mi.link/cover/{room}/{st}" width="196px" style="border-radius:10px"></a>
     <div></div>
     <div style="display: grid; grid-auto-flow: row; grid-template-rows: 1fr 1fr;">
         <h3 id="{username}-{title}">{username} {title}</h3>
@@ -152,8 +147,8 @@ async def cha():
         resp = await rac(session.get('http://api.nana7mi.link:5762/rooms', timeout=20.0))
         js = resp.json()
         if isinstance(js['rooms'], list):
-            pending = [asyncio.create_task(put_live(room, -1)) for room in js['rooms']][::-1]
-            await asyncio.wait(pending)
+            for room in js['rooms']:
+                await put_live(room, -1)
         else:
             toast(f'运行时错误：{js["rooms"]}', 3, color='error')
     except Exception as e:
@@ -171,21 +166,6 @@ async def about():
                 </iframe>''')
         }
     ]).style('border:none;')  # 取消 put_tabs 的边框
-
-
-@app.get("/cover/{filename}")
-async def new_room_cover(filename: str):
-    path =  'cover\\' + filename
-    if not os.path.exists(path):
-        async with httpx.AsyncClient() as session:
-            resp = await session.get('https://i0.hdslb.com/bfs/live/new_room_cover/'+filename)
-        # content = BytesIO(resp.content)
-        with Image(blob=resp.content) as img:
-            img.save(filename='cover\\raw_'+filename)
-            img.resize(width=196, height=int(img.height*196/img.width))
-            img.save(path)
-    if os.path.exists(path):
-        return StreamingResponse(open(path, mode="rb"), media_type="image/jpg")
 
 app.mount('/', FastAPI(routes=webio_routes({'index': cha, 'about': about})))
 # const Http = new XMLHttpRequest();
