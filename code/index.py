@@ -1,5 +1,4 @@
-﻿import asyncio
-import random
+﻿import random
 import time
 from functools import partial
 
@@ -10,12 +9,11 @@ from pywebio import config
 from pywebio.input import *
 from pywebio.output import *
 from pywebio.platform.fastapi import webio_routes
-from pywebio.session import eval_js
 from pywebio.session import run_asyncio_coroutine as rac
 from pywebio.session import run_js
 
 app = FastAPI()
-config(js_code='''$("body").prepend('<nav class="navbar navbar-dark bg-dark"><div class="container"><a href="/" class="router-link-active router-link-exact-active navbar-brand">🏠</a><a href="https://t.bilibili.com/682043379459031137"><img src="https://api.nana7mi.link/eyes" height="40px" style="border-radius:7px"></a><a href="/?app=about" class="router-link-active router-link-exact-active navbar-brand">❔</a></div></nav>')''')
+config(js_code='''$("body").prepend('<nav class="navbar navbar-dark bg-dark"><div class="container"><a href="/" class="router-link-active router-link-exact-active navbar-brand">🏠</a><a href="https://t.bilibili.com/682043379459031137"><img src="https://nana7mi.link/eyes" height="40px" style="border-radius:7px"></a><a href="/?app=about" class="router-link-active router-link-exact-active navbar-brand">❔</a></div></nav>')''')
 
 def code():
     '打印 python 源码'
@@ -44,7 +42,7 @@ async def put_live(room_info: dict, pos: int):
     room_info["rsp"] = t2s(room_info["sp"], "%Y/%m/%d %H:%M:%S")
     put_html(
 '''<div style="display: grid; grid-auto-flow: column; grid-template-columns: 10fr 1fr 30fr;" class="pywebio-clickable">
-    <a href="{cover}"><img src="https://api.nana7mi.link/cover/{room}/{st}" width="196px" style="border-radius:10px"></a>
+    <a href="{cover}"><img src="https://nana7mi.link/cover/{room}/{st}" alt width="196px" style="border-radius:10px"></a>
     <div></div>
     <div style="display: grid; grid-auto-flow: row; grid-template-rows: 1fr 1fr;">
         <h3 id="{username}-{title}">{username} {title}</h3>
@@ -168,14 +166,6 @@ async def about():
     ]).style('border:none;')  # 取消 put_tabs 的边框
 
 app.mount('/', FastAPI(routes=webio_routes({'index': cha, 'about': about})))
-# const Http = new XMLHttpRequest();
-# const url='http:api.nana7mi.link:5762/rooms';
-# Http.open("GET", url);
-# Http.send();
-
-# Http.onreadystatechange = (e) => {
-#   console.log(Http.responseText)
-# }
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=9000)
