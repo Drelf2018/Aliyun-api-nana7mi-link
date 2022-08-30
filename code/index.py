@@ -134,7 +134,8 @@ async def lives(roomid: str = ''):
     if roomid == '':
         roomid = await get_query('roomid')
         put_scope('query_scope')
-    if pos := await get_query('position'):
+    pos = await get_query('position')
+    if pos:
         with put_loading('border', 'primary'):
             resp = await rac(session.get(f'{BASEURL}/live/{roomid}/{pos}'))
         js = resp.json()
