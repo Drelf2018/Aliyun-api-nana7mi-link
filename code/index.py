@@ -18,8 +18,8 @@ esu = open('esu.png', 'rb').read()  # 查询页面配图
 forever = open('forever.png', 'rb').read()  # 私活页面配图
 BASEURL = 'https://api.nana7mi.link'
 
-config(js_code='''$("head").append('<meta name="referrer" content="no-referrer" />')''')
-config(js_code='''$("body").prepend('<nav class="navbar navbar-dark bg-dark"><div class="container"><a href="/" class="router-link-active router-link-exact-active navbar-brand">🏠</a><a href="https://t.bilibili.com/682043379459031137"><img src="https://nana7mi.link/eyes" height="40px" style="border-radius:7px"></a><a href="/?app=about" class="router-link-active router-link-exact-active navbar-brand">❔</a></div></nav>')''')
+config(js_code='''''')
+config(js_code='''$("head").prepend('<meta name="referrer" content="no-referrer" />');$("body").prepend('<nav class="navbar navbar-dark bg-dark"><div class="container"><a href="/" class="router-link-active router-link-exact-active navbar-brand">🏠</a><a href="https://t.bilibili.com/682043379459031137"><img src="https://nana7mi.link/eyes" height="40px" style="border-radius:7px"></a><a href="/?app=about" class="router-link-active router-link-exact-active navbar-brand">❔</a></div></nav>')''')
 
 def code():
     '打印 python 源码'
