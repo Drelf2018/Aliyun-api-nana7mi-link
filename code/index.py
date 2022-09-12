@@ -5,6 +5,7 @@ from functools import partial
 import httpx
 import uvicorn
 from fastapi import FastAPI
+from fastapi.routing import Mount
 from pywebio import config
 from pywebio.input import *
 from pywebio.output import *
@@ -13,9 +14,7 @@ from pywebio.session import run_asyncio_coroutine as rac
 from pywebio.session import run_js
 from pywebio_battery import get_query
 
-app = FastAPI()
 esu = open('esu.png', 'rb').read()  # 查询页面配图
-forever = open('forever.png', 'rb').read()  # 私活页面配图
 BASEURL = 'https://api.nana7mi.link'
 
 config(js_code='''$("head").prepend('<meta name="referrer" content="no-referrer" />');$("body").prepend('<nav class="navbar navbar-dark bg-dark"><div class="container"><a href="/" class="router-link-active router-link-exact-active navbar-brand">🏠</a><a href="https://t.bilibili.com/682043379459031137"><img src="https://nana7mi.link/eyes" height="40px" style="border-radius:7px"></a><a href="/?app=about" class="router-link-active router-link-exact-active navbar-brand">❔</a></div></nav>')''')
@@ -179,17 +178,18 @@ async def about():
     '关于'
     put_tabs([
         {'title': '源码', 'content': code()},
-        {'title': '私货', 'content': [
-            put_html('''
-                <iframe src="//player.bilibili.com/player.html?aid=78090377&bvid=BV1vJ411B7ng&cid=133606284&page=1"
-                    width="100%" height="550" scrolling="true" border="0" frameborder="no" framespacing="0" allowfullscreen="true">
-                </iframe>'''),
-            put_markdown('#### <font color="red">我要陪你成为最强直播员</font>'),
-            put_image(forever, format='png'),
-        ]}
+        {'title': '私货', 'content': put_html('''
+            <iframe src="//player.bilibili.com/player.html?aid=78090377&bvid=BV1vJ411B7ng&cid=133606284&page=1"
+                width="100%" height="550" scrolling="true" border="0" frameborder="no" framespacing="0" allowfullscreen="true">
+            </iframe>''')
+        }
     ]).style('border:none;')  # 取消 put_tabs 的边框
 
-app.mount('/', FastAPI(routes=webio_routes([index, about, lives, user])))
+routes = [
+    Mount('/lives', routes=webio_routes(lives)),
+    Mount('/user', routes=webio_routes(user)),
+    Mount('/', routes=webio_routes([index, about]))
+]
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=9000)
+    uvicorn.run(FastAPI(routes=routes), host="0.0.0.0", port=9000)
